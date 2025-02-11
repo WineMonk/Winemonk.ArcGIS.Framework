@@ -1,6 +1,0 @@
-{
-    "GisAppSettings": {
-        "NlogConfigPath": "nlog.config",
-        "DefaultLoggerName": "default"
-    }
-}

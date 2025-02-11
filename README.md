@@ -77,7 +77,7 @@ internal class Module1 : Module, IRegistrable // 需要添加 IRegistrable 接�
 
 ## 2 依赖注入
 
-**使用：**
+**使用（在ArcGISProSDK已内置构造器的类型中）：**
 ```csharp
 internal class SamplePaneViewModel : ViewStatePane, IInjectable // 需要添加 IInjectable 接口，无需实现，只做标记
 {
@@ -110,6 +110,30 @@ internal class SamplePaneViewModel : ViewStatePane, IInjectable // 需要添加 
         }
     }
     #endregion Pane Overrides
+}
+```
+
+**在自定义类型注册服务中，直接使用构造函数注入即可：**
+
+```csharp
+[RegisterService(typeof(TestLogService))]
+public class TestLogService
+{
+    private readonly ILogger<TestLogService> _logger;
+    public TestLogService(ILogger<TestLogService> logger)
+    {
+        _logger = logger;
+    }
+
+    public void WriteLog()
+    {
+        _logger?.LogTrace("Configured Logger Class LogTrace");
+        _logger?.LogDebug("Configured Logger Class LogDebug");
+        _logger?.LogInformation("Configured Logger Class LogInformation");
+        _logger?.LogWarning("Configured Logger Class LogWarning");
+        _logger?.LogError("Configured Logger Class LogError");
+        _logger?.LogCritical("Configured Logger Class LogCritical");
+    }
 }
 ```
 
@@ -235,6 +259,33 @@ internal class SamplePaneViewModel : ViewStatePane, IInjectable // 需要添加 
 **使用：**
 
 ```csharp
+using Microsoft.Extensions.Logging;
+
+namespace Winemonk.ArcGIS.Framework.Samples.Services
+{
+    [RegisterService(typeof(TestLogService))]
+    public class TestLogService
+    {
+        private readonly ILogger<TestLogService> _logger;
+        public TestLogService(ILogger<TestLogService> logger)
+        {
+            _logger = logger;
+        }
+
+        public void WriteLog()
+        {
+            _logger?.LogTrace("Configured Logger Class LogTrace");
+            _logger?.LogDebug("Configured Logger Class LogDebug");
+            _logger?.LogInformation("Configured Logger Class LogInformation");
+            _logger?.LogWarning("Configured Logger Class LogWarning");
+            _logger?.LogError("Configured Logger Class LogError");
+            _logger?.LogCritical("Configured Logger Class LogCritical");
+        }
+    }
+}
+```
+
+```csharp
 internal class SamplePaneViewModel : ViewStatePane, IInjectable // 需要添加 IInjectable 接口，无需实现，只做标记
 {
     private const string _viewPaneID = "Winemonk_ArcGIS_Framework_Samples_PlugIns_Panes_SamplePane";
@@ -248,16 +299,29 @@ internal class SamplePaneViewModel : ViewStatePane, IInjectable // 需要添加 
     
     // 标记自动注入特性
     [InjectService]
-    private readonly ILogger _logger; // 或 private readonly ILogger<SamplePaneViewModel> _logger;
-
+    private readonly ILogger _logger1;
+    [InjectService]
+    private readonly ILogger<SamplePaneViewModel> _logger2;
+    [InjectService]
+    private readonly TestLogService _testLogService;
+    
     public ICommand TestLogCommand => new RelayCommand(() =>
         {
-            _logger?.LogTrace("LogTrace");
-            _logger?.LogDebug("LogDebug");
-            _logger?.LogInformation("LogInformation");
-            _logger?.LogWarning("LogWarning");
-            _logger?.LogError("LogError");
-            _logger?.LogCritical("LogCritical");
+            _logger1?.LogTrace("Default Logger LogTrace");
+            _logger1?.LogDebug("Default Logger LogDebug");
+            _logger1?.LogInformation("Default Logger LogInformation");
+            _logger1?.LogWarning("Default Logger LogWarning");
+            _logger1?.LogError("Default Logger LogError");
+            _logger1?.LogCritical("Default Logger LogCritical");
+
+            _logger2?.LogTrace("Not configured Logger Class LogTrace");
+            _logger2?.LogDebug("Not configured Logger Class LogDebug");
+            _logger2?.LogInformation("Not configured Logger Class LogInformation");
+            _logger2?.LogWarning("Not configured Logger Class LogWarning");
+            _logger2?.LogError("Not configured Logger Class LogError");
+            _logger2?.LogCritical("Not configured Logger Class LogCritical");
+
+            _testLogService?.WriteLog();
         });
 
     #region Pane Overrides
@@ -273,7 +337,7 @@ internal class SamplePaneViewModel : ViewStatePane, IInjectable // 需要添加 
 }
 ```
 
-**日志配置：**
+**日志配置（.\Pro\bin\nlog.config）：**
 
 ```xml
 <?xml version="1.0" encoding="utf-8" ?>
@@ -283,15 +347,65 @@ internal class SamplePaneViewModel : ViewStatePane, IInjectable // 需要添加 
       autoReload="true"
       throwExceptions="false"
       internalLogLevel="OFF" internalLogFile="c:\temp\nlog-internal.log">
-  <targets>
-	<target xsi:type="File" name="f_app" fileName="${basedir}/GISAPP/logs/applog/applog-${shortdate}.log" archiveNumbering="Sequence" archiveEvery="Day" maxArchiveDays="30" archiveAboveSize="1048576"
-            layout="[${longdate}] ${threadid} ${message} ${exception}" />
-	<target xsi:type="File" name="f_net" fileName="${basedir}/GISAPP/logs/netlog/netlog-${shortdate}.log" archiveNumbering="Sequence" archiveEvery="Day" maxArchiveDays="30" archiveAboveSize="1048576"
-            layout="[${longdate}] ${threadid} ${message} ${exception}" />
-  </targets>
-  <rules>
-	  <logger name="*" minlevel="Trace" writeTo="f_app" />
-	  <logger name="Winemonk.ArcGIS.Framework.Samples.PlugIns.Panes.SamplePaneViewModel" minlevel="Trace" writeTo="f_net" />
-  </rules>
+	<targets>
+		<target xsi:type="File" name="f_all" fileName="${basedir}/GISAPP/logs/all-${shortdate}.log"
+				archiveNumbering="Sequence" archiveEvery="Day" maxArchiveDays="30" archiveAboveSize="104857600"
+				layout="[${longdate}] ${threadid} ${callsite} ${callsite-linenumber} ${message} ${exception}" />
+		<target xsi:type="File" name="f_default" fileName="${basedir}/GISAPP/logs/default-${shortdate}.log"
+				archiveNumbering="Sequence" archiveEvery="Day" maxArchiveDays="30" archiveAboveSize="104857600"
+				layout="[${longdate}] ${threadid} ${callsite} ${callsite-linenumber} ${message} ${exception}" />
+		<target xsi:type="File" name="f_test" fileName="${basedir}/GISAPP/logs/test-${shortdate}.log"
+				archiveNumbering="Sequence" archiveEvery="Day" maxArchiveDays="30" archiveAboveSize="104857600"
+				layout="[${longdate}] ${threadid} ${callsite} ${callsite-linenumber} ${message} ${exception}" />
+	</targets>
+	<rules>
+		<logger name="*" minlevel="Trace" writeTo="f_all" />
+		<logger name="." minlevel="Trace" writeTo="f_default" />
+		<logger name="Winemonk.ArcGIS.Framework.Samples.Services.TestLogService" minlevel="Trace" writeTo="f_test" />
+	</rules>
 </nlog>
+```
+
+**日志：**
+
+all-2025-02-11.log
+```log
+[2025-02-11 16:28:33.2379] 1 Winemonk.ArcGIS.Framework.Samples.PlugIns.Panes.SamplePaneViewModel.get_TestLogCommand 47 Default Logger LogTrace 
+[2025-02-11 16:28:33.3172] 1 Winemonk.ArcGIS.Framework.Samples.PlugIns.Panes.SamplePaneViewModel.get_TestLogCommand 48 Default Logger LogDebug 
+[2025-02-11 16:28:33.3231] 1 Winemonk.ArcGIS.Framework.Samples.PlugIns.Panes.SamplePaneViewModel.get_TestLogCommand 49 Default Logger LogInformation 
+[2025-02-11 16:28:33.3231] 1 Winemonk.ArcGIS.Framework.Samples.PlugIns.Panes.SamplePaneViewModel.get_TestLogCommand 50 Default Logger LogWarning 
+[2025-02-11 16:28:33.3231] 1 Winemonk.ArcGIS.Framework.Samples.PlugIns.Panes.SamplePaneViewModel.get_TestLogCommand 51 Default Logger LogError 
+[2025-02-11 16:28:33.3231] 1 Winemonk.ArcGIS.Framework.Samples.PlugIns.Panes.SamplePaneViewModel.get_TestLogCommand 52 Default Logger LogCritical 
+[2025-02-11 16:28:33.3231] 1 Winemonk.ArcGIS.Framework.Samples.PlugIns.Panes.SamplePaneViewModel.get_TestLogCommand 54 Not configured Logger Class LogTrace 
+[2025-02-11 16:28:33.3231] 1 Winemonk.ArcGIS.Framework.Samples.PlugIns.Panes.SamplePaneViewModel.get_TestLogCommand 55 Not configured Logger Class LogDebug 
+[2025-02-11 16:28:33.3231] 1 Winemonk.ArcGIS.Framework.Samples.PlugIns.Panes.SamplePaneViewModel.get_TestLogCommand 56 Not configured Logger Class LogInformation 
+[2025-02-11 16:28:33.3231] 1 Winemonk.ArcGIS.Framework.Samples.PlugIns.Panes.SamplePaneViewModel.get_TestLogCommand 57 Not configured Logger Class LogWarning 
+[2025-02-11 16:28:33.3231] 1 Winemonk.ArcGIS.Framework.Samples.PlugIns.Panes.SamplePaneViewModel.get_TestLogCommand 58 Not configured Logger Class LogError 
+[2025-02-11 16:28:33.3231] 1 Winemonk.ArcGIS.Framework.Samples.PlugIns.Panes.SamplePaneViewModel.get_TestLogCommand 59 Not configured Logger Class LogCritical 
+[2025-02-11 16:28:33.3231] 1 Winemonk.ArcGIS.Framework.Samples.Services.TestLogService.WriteLog 21 Configured Logger Class LogTrace 
+[2025-02-11 16:28:33.3231] 1 Winemonk.ArcGIS.Framework.Samples.Services.TestLogService.WriteLog 22 Configured Logger Class LogDebug 
+[2025-02-11 16:28:33.3231] 1 Winemonk.ArcGIS.Framework.Samples.Services.TestLogService.WriteLog 23 Configured Logger Class LogInformation 
+[2025-02-11 16:28:33.3231] 1 Winemonk.ArcGIS.Framework.Samples.Services.TestLogService.WriteLog 24 Configured Logger Class LogWarning 
+[2025-02-11 16:28:33.3231] 1 Winemonk.ArcGIS.Framework.Samples.Services.TestLogService.WriteLog 25 Configured Logger Class LogError 
+[2025-02-11 16:28:33.3231] 1 Winemonk.ArcGIS.Framework.Samples.Services.TestLogService.WriteLog 26 Configured Logger Class LogCritical 
+```
+
+default-2025-02-11.log
+```log
+[2025-02-11 16:28:33.2379] 1 Winemonk.ArcGIS.Framework.Samples.PlugIns.Panes.SamplePaneViewModel.get_TestLogCommand 47 Default Logger LogTrace 
+[2025-02-11 16:28:33.3172] 1 Winemonk.ArcGIS.Framework.Samples.PlugIns.Panes.SamplePaneViewModel.get_TestLogCommand 48 Default Logger LogDebug 
+[2025-02-11 16:28:33.3231] 1 Winemonk.ArcGIS.Framework.Samples.PlugIns.Panes.SamplePaneViewModel.get_TestLogCommand 49 Default Logger LogInformation 
+[2025-02-11 16:28:33.3231] 1 Winemonk.ArcGIS.Framework.Samples.PlugIns.Panes.SamplePaneViewModel.get_TestLogCommand 50 Default Logger LogWarning 
+[2025-02-11 16:28:33.3231] 1 Winemonk.ArcGIS.Framework.Samples.PlugIns.Panes.SamplePaneViewModel.get_TestLogCommand 51 Default Logger LogError 
+[2025-02-11 16:28:33.3231] 1 Winemonk.ArcGIS.Framework.Samples.PlugIns.Panes.SamplePaneViewModel.get_TestLogCommand 52 Default Logger LogCritical 
+```
+
+test-2025-02-11.log
+```log
+[2025-02-11 16:28:33.3231] 1 Winemonk.ArcGIS.Framework.Samples.Services.TestLogService.WriteLog 21 Configured Logger Class LogTrace 
+[2025-02-11 16:28:33.3231] 1 Winemonk.ArcGIS.Framework.Samples.Services.TestLogService.WriteLog 22 Configured Logger Class LogDebug 
+[2025-02-11 16:28:33.3231] 1 Winemonk.ArcGIS.Framework.Samples.Services.TestLogService.WriteLog 23 Configured Logger Class LogInformation 
+[2025-02-11 16:28:33.3231] 1 Winemonk.ArcGIS.Framework.Samples.Services.TestLogService.WriteLog 24 Configured Logger Class LogWarning 
+[2025-02-11 16:28:33.3231] 1 Winemonk.ArcGIS.Framework.Samples.Services.TestLogService.WriteLog 25 Configured Logger Class LogError 
+[2025-02-11 16:28:33.3231] 1 Winemonk.ArcGIS.Framework.Samples.Services.TestLogService.WriteLog 26 Configured Logger Class LogCritical 
 ```
