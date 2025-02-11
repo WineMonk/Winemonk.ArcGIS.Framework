@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Winemonk.ArcGIS.Framework.Samples": {
+      "commandName": "Executable",
+      "executablePath": "D:\\software\\ArcGIS\\Pro\\bin\\ArcGISPro.exe"
+    }
+  }
+}

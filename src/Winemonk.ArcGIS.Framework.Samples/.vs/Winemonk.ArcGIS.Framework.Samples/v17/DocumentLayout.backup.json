@@ -1,0 +1,71 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\hub\\Winemonk.ArcGIS.Framework.Samples\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{EFDC4BAD-28A9-454F-AD26-A9274561D36C}|Winemonk.ArcGIS.Framework.Samples\\Winemonk.ArcGIS.Framework.Samples.csproj|d:\\hub\\winemonk.arcgis.framework.samples\\winemonk.arcgis.framework.samples\\plugins\\panes\\samplepaneviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EFDC4BAD-28A9-454F-AD26-A9274561D36C}|Winemonk.ArcGIS.Framework.Samples\\Winemonk.ArcGIS.Framework.Samples.csproj|solutionrelative:winemonk.arcgis.framework.samples\\plugins\\panes\\samplepaneviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EFDC4BAD-28A9-454F-AD26-A9274561D36C}|Winemonk.ArcGIS.Framework.Samples\\Winemonk.ArcGIS.Framework.Samples.csproj|d:\\hub\\winemonk.arcgis.framework.samples\\winemonk.arcgis.framework.samples\\module1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EFDC4BAD-28A9-454F-AD26-A9274561D36C}|Winemonk.ArcGIS.Framework.Samples\\Winemonk.ArcGIS.Framework.Samples.csproj|solutionrelative:winemonk.arcgis.framework.samples\\module1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EFDC4BAD-28A9-454F-AD26-A9274561D36C}|Winemonk.ArcGIS.Framework.Samples\\Winemonk.ArcGIS.Framework.Samples.csproj|d:\\hub\\winemonk.arcgis.framework.samples\\winemonk.arcgis.framework.samples\\plugins\\menus\\showsamplepanebutton.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EFDC4BAD-28A9-454F-AD26-A9274561D36C}|Winemonk.ArcGIS.Framework.Samples\\Winemonk.ArcGIS.Framework.Samples.csproj|solutionrelative:winemonk.arcgis.framework.samples\\plugins\\menus\\showsamplepanebutton.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "SamplePaneViewModel.cs",
+              "DocumentMoniker": "D:\\hub\\Winemonk.ArcGIS.Framework.Samples\\Winemonk.ArcGIS.Framework.Samples\\PlugIns\\Panes\\SamplePaneViewModel.cs",
+              "RelativeDocumentMoniker": "Winemonk.ArcGIS.Framework.Samples\\PlugIns\\Panes\\SamplePaneViewModel.cs",
+              "ToolTip": "D:\\hub\\Winemonk.ArcGIS.Framework.Samples\\Winemonk.ArcGIS.Framework.Samples\\PlugIns\\Panes\\SamplePaneViewModel.cs",
+              "RelativeToolTip": "Winemonk.ArcGIS.Framework.Samples\\PlugIns\\Panes\\SamplePaneViewModel.cs",
+              "ViewState": "AgIAAAUAAAAAAAAAAAAmwBUAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-11T06:27:17.03Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Module1.cs",
+              "DocumentMoniker": "D:\\hub\\Winemonk.ArcGIS.Framework.Samples\\Winemonk.ArcGIS.Framework.Samples\\Module1.cs",
+              "RelativeDocumentMoniker": "Winemonk.ArcGIS.Framework.Samples\\Module1.cs",
+              "ToolTip": "D:\\hub\\Winemonk.ArcGIS.Framework.Samples\\Winemonk.ArcGIS.Framework.Samples\\Module1.cs",
+              "RelativeToolTip": "Winemonk.ArcGIS.Framework.Samples\\Module1.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAADwvw8AAAAgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-11T06:27:06.266Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ShowSamplePaneButton.cs",
+              "DocumentMoniker": "D:\\hub\\Winemonk.ArcGIS.Framework.Samples\\Winemonk.ArcGIS.Framework.Samples\\PlugIns\\Menus\\ShowSamplePaneButton.cs",
+              "RelativeDocumentMoniker": "Winemonk.ArcGIS.Framework.Samples\\PlugIns\\Menus\\ShowSamplePaneButton.cs",
+              "ToolTip": "D:\\hub\\Winemonk.ArcGIS.Framework.Samples\\Winemonk.ArcGIS.Framework.Samples\\PlugIns\\Menus\\ShowSamplePaneButton.cs",
+              "RelativeToolTip": "Winemonk.ArcGIS.Framework.Samples\\PlugIns\\Menus\\ShowSamplePaneButton.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-10T10:32:41.142Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

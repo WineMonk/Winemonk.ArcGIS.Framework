@@ -1,0 +1,297 @@
+# ArcGISProSDK Addin 扩展框架（IoC容器、Options配置、通用日志+Nlog...）
+
+> **环境：Visual Studio 2022 + .NET8 + ArcGIS Pro SDK 3.4**
+
+## 1 服务注册
+### 1.1 标记服务注册特性 — RegisterServiceAttribute
+
+**使用：**
+
+```csharp
+public interface ISampleService
+{
+    void Test();
+}
+
+[RegisterService(typeof(ISampleService))]
+public class SampleService : ISampleService
+{
+    public void Test()
+    {
+        MessageBox.Show("Hello World!", "Hello");
+    }
+}
+```
+
+**说明：**
+
+```csharp
+/// <summary>
+/// 服务注册特性
+/// </summary>
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+public sealed class RegisterServiceAttribute : Attribute
+{
+    /// <summary>
+    /// 服务注册键
+    /// </summary>
+    public string? ServiceKey { get; set; }
+    /// <summary>
+    /// 服务注册类型
+    /// </summary>
+    public Type? ServiceType { get; set; }
+    /// <summary>
+    /// 服务重用模式
+    /// </summary>
+    public ReuseEnum Reuse { get; set; }
+    /// <summary>
+    /// 服务注册特性
+    /// </summary>
+    /// <param name="serviceType"> 服务注册类型 </param>
+    /// <param name="serviceKey"> 服务注册键 </param>
+    /// <param name="reuse"> 服务重用模式 </param>
+    public RegisterServiceAttribute(Type? serviceType, string? serviceKey = null, ReuseEnum reuse = ReuseEnum.Default)
+    {
+        ServiceType = serviceType;
+        ServiceKey = serviceKey;
+        Reuse = reuse;
+    }
+}
+```
+
+### 1.2 在模块初始化时调用服务自动注册
+```csharp
+internal class Module1 : Module, IRegistrable // 需要添加 IRegistrable 接口，无需实现，只做标记
+{
+    private static Module1 _this = null;
+
+    public static Module1 Current => _this ??= (Module1)FrameworkApplication.FindModule("Winemonk_ArcGIS_Framework_Samples_Module");
+
+    public Module1()
+    {
+        // 调用服务自动注册
+        this.RegisterService();
+    }
+}
+```
+
+## 2 依赖注入
+
+**使用：**
+```csharp
+internal class SamplePaneViewModel : ViewStatePane, IInjectable // 需要添加 IInjectable 接口，无需实现，只做标记
+{
+    private const string _viewPaneID = "Winemonk_ArcGIS_Framework_Samples_PlugIns_Panes_SamplePane";
+
+    public SamplePaneViewModel(CIMView view)
+      : base(view)
+    {
+        // 调用注入
+        this.InjectService();
+    }
+
+    // 标记自动注入特性
+    [InjectService]
+    private readonly ISampleService _SampleService;
+
+    public ICommand TestInjectCommand => new RelayCommand(() =>
+        {
+            _sampleService?.HelloWorld();
+        });
+
+
+    #region Pane Overrides
+    public override CIMView ViewState
+    {
+        get
+        {
+            _cimView.InstanceID = (int)InstanceID;
+            return _cimView;
+        }
+    }
+    #endregion Pane Overrides
+}
+```
+
+**说明：**
+
+```csharp
+/// <summary>
+/// 自动c特性
+/// </summary>
+[AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
+public sealed class InjectServiceAttribute : Attribute
+{
+    /// <summary>
+    /// 服务注册键
+    /// </summary>
+    public object? Key { get; set; }
+    /// <summary>
+    /// 服务类型
+    /// </summary>
+    public Type? ServiceType { get; set; }
+    /// <summary>
+    /// 自动注入特性
+    /// </summary>
+    /// <param name="key"> 服务注册键 </param>
+    /// <param name="serviceType"> 服务类型 </param>
+    public InjectServiceAttribute(object? key = null, Type? serviceType = null)
+    {
+        Key = key;
+        ServiceType = serviceType;
+    }
+}
+```
+
+## 3 Options配置
+
+### 3.1 创建配置类
+
+```csharp
+public class SampleSettings
+{
+    public string Value1 { get; set; }
+    public int Value2 { get; set; }
+    public double Value3 { get; set; }
+    public string[] Value4 { get; set; }
+}
+```
+
+### 3.2 在模块初始化时注册配置
+```csharp
+internal class Module1 : Module
+{
+    private static Module1 _this = null;
+
+    public static Module1 Current => _this ??= (Module1)FrameworkApplication.FindModule("Winemonk_ArcGIS_Framework_Samples_Module");
+
+    public Module1()
+    {
+        // samplesettings.json文件内容
+        // "SampleSettings": {
+        //     "Value1": "asd",
+        //     "Value2": 123,
+        //     "Value3": 123.456,
+        //     "Value4": [
+        //         "asd",
+        //         "zxc",
+        //         "qwe"
+        //     ]
+        // }
+        IConfiguration configuration = new ConfigurationBuilder().AddJsonFile("SampleSettings.json", false, true).Build();
+        GisApp.App().Configure<SampleSettings>(configuration.GetSection(typeof(SampleSettings).Name));
+    }
+}
+```
+
+### 3.3 使用配置
+
+```csharp
+internal class SamplePaneViewModel : ViewStatePane, IInjectable // 需要添加 IInjectable 接口，无需实现，只做标记
+{
+    private const string _viewPaneID = "Winemonk_ArcGIS_Framework_Samples_PlugIns_Panes_SamplePane";
+
+    public SamplePaneViewModel(CIMView view)
+      : base(view)
+    {
+        // 调用注入
+        this.Inject();
+        _optionsMonitor.OnChange(settings =>
+        {
+            string json = JsonSerializer.Serialize(_optionsMonitor.CurrentValue);
+            FrameworkApplication.AddNotification(new Notification
+            {
+                Title = "SampleSettings Changed!",
+                Message = json
+            });
+        });
+    }
+    
+    // 标记自动注入特性
+    [InjectService]
+    private readonly IOptionsMonitor<SampleSettings> _optionsMonitor;
+
+    public ICommand TestOptionsCommand  => new RelayCommand(() =>
+        {
+            string json = JsonSerializer.Serialize(_optionsMonitor.CurrentValue);
+            MessageBox.Show(json, "SampleSettings");
+        });
+
+    #region Pane Overrides
+    public override CIMView ViewState
+    {
+        get
+        {
+            _cimView.InstanceID = (int)InstanceID;
+            return _cimView;
+        }
+    }
+    #endregion Pane Overrides
+}
+```
+
+## 4 通用日志（已集成Nlog）
+
+**使用：**
+
+```csharp
+internal class SamplePaneViewModel : ViewStatePane, IInjectable // 需要添加 IInjectable 接口，无需实现，只做标记
+{
+    private const string _viewPaneID = "Winemonk_ArcGIS_Framework_Samples_PlugIns_Panes_SamplePane";
+
+    public SamplePaneViewModel(CIMView view)
+      : base(view)
+    {
+        // 调用注入
+        this.Inject();
+    }
+    
+    // 标记自动注入特性
+    [InjectService]
+    private readonly ILogger _logger; // 或 private readonly ILogger<SamplePaneViewModel> _logger;
+
+    public ICommand TestLogCommand => new RelayCommand(() =>
+        {
+            _logger?.LogTrace("LogTrace");
+            _logger?.LogDebug("LogDebug");
+            _logger?.LogInformation("LogInformation");
+            _logger?.LogWarning("LogWarning");
+            _logger?.LogError("LogError");
+            _logger?.LogCritical("LogCritical");
+        });
+
+    #region Pane Overrides
+    public override CIMView ViewState
+    {
+        get
+        {
+            _cimView.InstanceID = (int)InstanceID;
+            return _cimView;
+        }
+    }
+    #endregion Pane Overrides
+}
+```
+
+**日志配置：**
+
+```xml
+<?xml version="1.0" encoding="utf-8" ?>
+<nlog xmlns="http://www.nlog-project.org/schemas/NLog.xsd"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.nlog-project.org/schemas/NLog.xsd NLog.xsd"
+      autoReload="true"
+      throwExceptions="false"
+      internalLogLevel="OFF" internalLogFile="c:\temp\nlog-internal.log">
+  <targets>
+	<target xsi:type="File" name="f_app" fileName="${basedir}/GISAPP/logs/applog/applog-${shortdate}.log" archiveNumbering="Sequence" archiveEvery="Day" maxArchiveDays="30" archiveAboveSize="1048576"
+            layout="[${longdate}] ${threadid} ${message} ${exception}" />
+	<target xsi:type="File" name="f_net" fileName="${basedir}/GISAPP/logs/netlog/netlog-${shortdate}.log" archiveNumbering="Sequence" archiveEvery="Day" maxArchiveDays="30" archiveAboveSize="1048576"
+            layout="[${longdate}] ${threadid} ${message} ${exception}" />
+  </targets>
+  <rules>
+	  <logger name="*" minlevel="Trace" writeTo="f_app" />
+	  <logger name="Winemonk.ArcGIS.Framework.Samples.PlugIns.Panes.SamplePaneViewModel" minlevel="Trace" writeTo="f_net" />
+  </rules>
+</nlog>
+```
